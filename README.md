@@ -8,8 +8,14 @@
 
 ## 🚀 Unidade I
 
+### 📚 Assuntos
+
+- [📝 Processos](https://github.com/CarlosG18/so_dca0108/blob/main/unidade1/assuntos/processos.md)
+
+- [📝 Threads](https://github.com/CarlosG18/so_dca0108/blob/main/unidade1/assuntos/threads.md)
+
 ### 🎯 Atividades/projetos
-- [📌 Operações com Processos em Sistemas POSIX](https://github.com/CarlosG18/so_dca0108/blob/main/unidade1/u1t1/u1t1.md)
+- [📌 Detecção de bordas em imagens](https://github.com/CarlosG18/so_dca0108/blob/main/unidade1/u1t1/u1t1.md)
 
 ## 🚀 Unidade II
 
