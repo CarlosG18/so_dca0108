@@ -23,7 +23,11 @@ pid_t getppid(); -> retorna o id do processo pai
 
 ### 🔶 Estado de um processo
 
+Um processo pode está em um dos três estados definidos abaixo:
 
+1. **Em execução**: nesse estado o processo está usando a CPU naquele instante.
+2. **Pronto**: o processo está executável porém no momento parado para que outro processo seja executado.
+3. **Bloqueado**: O processo não pode ser executado, mesmo que a CPU estiver ociosa. isso geralmente ocorre quando o processo nescessita de uma entrada que esta indisponivel ou quando o sistema operacional decide naquele momento usar a CPU para executar outro processo.
 
 ## [2/3] 🔧 Como usar?
 
@@ -31,11 +35,48 @@ pid_t getppid(); -> retorna o id do processo pai
 
 ⚠️ **obs**: após a criação do processo, o processo pai e o processo filho possuem seus próprios espaços de endereçamento distintos.
 
-🔶 **finalizar um processo**: A chamada para finalizar um processo é a **exit**.
+🔶 **finalizar um processo**: A chamada para finalizar um processo é a **exit**. Quando chamada, ela encerra imediatamente o processo, incluindo todos os seus processos filhos. Portanto, é importante ter cuidado ao usá-la, especialmente em processos pai que possuem vários processos filhos em execução ou a serem executados. Se a intenção não for encerrar todo o conjunto de processos (pai e filhos), deve-se tomar cuidado para chamar exit() apenas no processo desejado e tomar as medidas necessárias para garantir que os outros processos continuem a ser executados corretamente. Caso contrário, a execução dos processos restantes pode ser interrompida de forma inesperada.
 
 ### 🔍 Exemplo básico
 
 Vamos aplicar os conhecimentos adquiridos nesse readme e fazer um exemplo simples para entendermos os **processos** na prática.
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main(void){
+    
+    printf("(fora) PID do processo pai = %d\n", getpid());
+
+    int pid = fork();
+
+    if(pid < 0){
+        printf("erro ao criar o processo filho!");
+    }else if(pid == 0){
+        printf("(dentro) PID do processo pai = %d\n", getppid());
+        printf("processo filho criado com sucesso!\n");
+        printf("PID do processo filho = %d", getpid());
+        exit();
+    }
+    
+    return 0;
+}
+```
+
+**OUTPUT**:
+
+```txt
+(fora) PID do processo pai = 16370
+(dentro) PID do processo pai = 16370
+processo filho criado com sucesso!
+```
+
+Neste exemplo, mostramos o PID do processo pai e criamos um processo filho com o uso da diretiva `fork`. quando usamos o fork, ele retorna o valor **inteiro 0** se o processo filho for criado com sucesso ou retorna **-1** caso contrario. dentro do `else if(pid == 0)` irá conter o programa que o processo filho executará. Dentro do programa do processo filho, printamos novamento o **PID** do processo pai e o **PID** do processo filho. O processo filho é encerrado ao exercutarmos a chamada da diretiva `exit()`.
+
+**alguns exemplos mais elaborados serão abordados em assuntos mais a frete do curso**.
 
 ## [3/3] 🎯 Para que usamos processos?
 

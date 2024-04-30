@@ -26,8 +26,6 @@ int main(void){
 
   char buffer[256];
 
-  //int **matriz_img;
-
   if(arquivo == NULL){
     printf("erro na abertura de arquivo");
   }else{
@@ -39,15 +37,8 @@ int main(void){
     fgets(buffer, sizeof(buffer), arquivo);
 
     linhas = (larg*alt)/colunas;
-
-    //alocando as linhas da matriz_img
-    //matriz_img = (int **)malloc(linhas * sizeof(int *));
-
-    //alocando cada coluna de cada linha da matriz_img
-    //for(int i =0; i<linhas; i++){
-      //matriz_img[i] = (int *)malloc(colunas * sizeof(int));
-    //}
   }
+
   int **matriz_img = create_matriz(linhas, colunas);
 
   //add valores da imagem na matriz_img
@@ -59,6 +50,11 @@ int main(void){
     }
   }
 
+
+  for(int i=0; i< 12; i++){
+    printf("matriz_img[%d][%d] = %d\n\n", 4468,i,matriz_img[4468][i]);
+  }
+  
   fclose(arquivo);
   
   //criando o primeiro processo filho que gerará o arquivo com a imagem processada no eixo x
@@ -71,9 +67,8 @@ int main(void){
     
   if(pid1 == 0){
     int **matriz_x = create_matriz(linhas, colunas);
-    //printf("processo filho 1 PID = %d\n", getpid());
-    //obtendo a imagem com o processamento de deteccao de borda do eixo x
     FILE *arquivo_x = fopen("coins_x.ascii.pgm", "w");
+    
     //incluir as linhas bases
     fprintf(arquivo_x,"P2\n");
     fprintf(arquivo_x,"# fred.pgm created by PGMA_IO::PGMA_WRITE.\n");
@@ -88,8 +83,7 @@ int main(void){
         for(int j=0; j<colunas; j++){
           if((i > 0 && i < linhas-1) && (j > 0 && j < colunas-1)){
             matriz_x[i][j] = (-matriz_img[i-1][j-1] - matriz_img[i-1][j] - matriz_img[i-1][j+1]) + (matriz_img[i+1][j-1] + matriz_img[i+1][j] + matriz_img[i+1][j+1]); 
-            //matriz_x[i][j] = (matriz_img[i+1][j-1] + matriz_img[i+1][j] + matriz_img[i+1][j+1]) - (matriz_img[i-1][j-1] + matriz_img[i-1][j] + matriz_img[i-1][j+1]); 
-
+            
             if(matriz_x[i][j] > 255){
               matriz_x[i][j] = 255;
             }
@@ -115,8 +109,6 @@ int main(void){
     free(matriz_x);
   }else{
     filho1 = wait(&estado1);
-    //printf("\nProcesso pai: PID = %d", getpid());
-    //printf("\nFilho 1 PID = %d finalizado!", filho1);
     exit(0);
   }
   
@@ -130,7 +122,6 @@ int main(void){
   
   if(pid2 == 0){
     int **matriz_y = create_matriz(linhas, colunas);
-    //printf("processo filho 2 PID = %d\n", getpid());
     //obtendo a imagem com o processamento de deteccao de borda do eixo y
     FILE *arquivo_y = fopen("coins_y.ascii.pgm", "w");
     //incluir as linhas bases
@@ -145,9 +136,8 @@ int main(void){
       for(int i=1; i<linhas-2; i++){
         for(int j=1; j<colunas-2; j++){
           if((i > 0 && i < linhas-1) && (j > 0 && j < colunas-1)){
-            //matriz_y[i][j] = (-matriz_img[i-1][j-1] - matriz_img[i][j-1] - matriz_img[i+1][j-1]) + (matriz_img[i-1][j+1] + matriz_img[i][j+1] + matriz_img[i+1][j+1]);
-            matriz_y[i][j] = (matriz_img[i-1][j+1] + matriz_img[i][j+1] + matriz_img[i+1][j+1]) - (matriz_img[i-1][j-1] + matriz_img[i][j-1] + matriz_img[i+1][j-1]);
-
+            matriz_y[i][j] = (-matriz_img[i-1][j-1] - matriz_img[i][j-1] - matriz_img[i+1][j-1]) + (matriz_img[i-1][j+1] + matriz_img[i][j+1] + matriz_img[i+1][j+1]);
+            
             if(matriz_y[i][j] > 255){
               matriz_y[i][j] = 255;
             }
@@ -171,8 +161,6 @@ int main(void){
     free(matriz_y);
   }else{
     filho2 = wait(&estado2);
-    //printf("\nProcesso pai: PID = %d", getpid());
-    //printf("\nFilho 2 PID = %d finalizado!", filho2);
     exit(0);
   }
   
@@ -184,7 +172,6 @@ int main(void){
   if(arquivo_final == NULL){
     printf("Erro em abrir o arquivo_final!");
   }else{
-    printf("abertura do arquivo_final ok!\n");
     //incluir as linhas bases
     fprintf(arquivo_final,"P2\n");
     fprintf(arquivo_final,"# fred.pgm created by PGMA_IO::PGMA_WRITE.\n");
@@ -200,7 +187,6 @@ int main(void){
         fgets(buffer, sizeof(buffer), arquivo_Y);
       }
 
-      printf("abertura do arquivo_x e y ok!\n");
       for(int i=1; i<linhas-2; i++){
         for(int j=1; j<colunas-2; j++){
           int valueX, valueY, sumValues;
@@ -217,13 +203,7 @@ int main(void){
       }
     }
   }
-  fclose(arquivo_X);
-  printf("fechadura X ok!\n");
-  fclose(arquivo_Y);
-  printf("fechadura Y ok!\n");
-  fclose(arquivo_final);
-  printf("fechadura final ok!\n");
-
+  
   free(matriz_img[0]);
   free(matriz_img);
   return 0;
