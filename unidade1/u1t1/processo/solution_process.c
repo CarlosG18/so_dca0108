@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <math.h>
 
 int** create_matriz(int linhas, int colunas){
   int **matriz;
@@ -21,8 +22,7 @@ int main(void){
   
   //primeira parte - alocando uma matriz com os valores da imagem
   FILE *arquivo = fopen("coins.ascii.pgm","r");
-  int larg, alt, linhas;
-  int colunas = 12; //numero de bits que serao usados para representar um pixel
+  int colunas, linhas;
 
   char buffer[256];
 
@@ -32,11 +32,9 @@ int main(void){
     //desconsiderando algumas linhas
     fgets(buffer, sizeof(buffer), arquivo);
     fgets(buffer, sizeof(buffer), arquivo);
-    fscanf(arquivo, "%d %d", &larg, &alt); //obtendo o tamanho da imagem 
+    fscanf(arquivo, "%d %d", &colunas, &linhas); //obtendo o tamanho da imagem 
     fgets(buffer, sizeof(buffer), arquivo);
     fgets(buffer, sizeof(buffer), arquivo);
-
-    linhas = (larg*alt)/colunas;
   }
 
   int **matriz_img = create_matriz(linhas, colunas);
@@ -48,11 +46,6 @@ int main(void){
         fscanf(arquivo, "%d", &valor);
         matriz_img[i][j] = valor;
     }
-  }
-
-
-  for(int i=0; i< 12; i++){
-    printf("matriz_img[%d][%d] = %d\n\n", 4468,i,matriz_img[4468][i]);
   }
   
   fclose(arquivo);
@@ -77,12 +70,15 @@ int main(void){
 
     if(arquivo_x == NULL){
       printf("erro na abertura de arquivo");
-    }else{
-      int cont = 0;
-      for(int i=0; i<linhas; i++){
-        for(int j=0; j<colunas; j++){
-          if((i > 0 && i < linhas-1) && (j > 0 && j < colunas-1)){
-            matriz_x[i][j] = (-matriz_img[i-1][j-1] - matriz_img[i-1][j] - matriz_img[i-1][j+1]) + (matriz_img[i+1][j-1] + matriz_img[i+1][j] + matriz_img[i+1][j+1]); 
+    }else{  
+      for(int i = 0; i < linhas; i++){
+        for(int j = 0; j < colunas; j++){
+          if(i == 0 || j == 0 || i == linhas-1 || j == colunas-1){
+            fprintf(arquivo_x, "%d  ", matriz_img[i][j]);
+          }else{
+            int parcela1 = matriz_img[i-1][j-1] + matriz_img[i][j-1] + matriz_img[i+1][j-1];
+            int parcela2 = matriz_img[i-1][j+1] + matriz_img[i][j+1] + matriz_img[i+1][j+1];
+            matriz_x[i][j] = parcela2 - parcela1;
             
             if(matriz_x[i][j] > 255){
               matriz_x[i][j] = 255;
@@ -96,10 +92,7 @@ int main(void){
             }
 
             fprintf(arquivo_x, "%d  ", matriz_x[i][j]);
-          }else{
-            fprintf(arquivo_x, "%d  ", matriz_img[i][j]);
           }
-          
         }
         fprintf(arquivo_x, "\n");
       }
@@ -133,24 +126,27 @@ int main(void){
     if(arquivo_y == NULL){
       printf("erro na abertura de arquivo");
     }else{
-      for(int i=1; i<linhas-2; i++){
-        for(int j=1; j<colunas-2; j++){
-          if((i > 0 && i < linhas-1) && (j > 0 && j < colunas-1)){
-            matriz_y[i][j] = (-matriz_img[i-1][j-1] - matriz_img[i][j-1] - matriz_img[i+1][j-1]) + (matriz_img[i-1][j+1] + matriz_img[i][j+1] + matriz_img[i+1][j+1]);
+      for(int i = 0; i < linhas; i++){
+        for(int j = 0; j < colunas; j++){
+          if(i == 0 || j == 0 || i == linhas-1 || j == colunas-1){
+            fprintf(arquivo_y, "%d  ", matriz_img[i][j]);
+          }else{
+            int parcela1 = matriz_img[i-1][j-1] + matriz_img[i-1][j] + matriz_img[i-1][j+1];
+            int parcela2 = matriz_img[i+1][j-1] + matriz_img[i+1][j] + matriz_img[i+1][j+1];
+            matriz_y[i][j] = parcela2 - parcela1;
             
             if(matriz_y[i][j] > 255){
               matriz_y[i][j] = 255;
             }
-          
+            
             if(matriz_y[i][j] < 0){
               matriz_y[i][j] = -1*matriz_y[i][j];
               if(matriz_y[i][j] > 255){
                 matriz_y[i][j] = 255;
               }
             }
+
             fprintf(arquivo_y, "%d  ", matriz_y[i][j]);
-          }else{
-            fprintf(arquivo_y, "%d  ", matriz_img[i][j]);  
           }
         }
         fprintf(arquivo_y, "\n");
@@ -187,13 +183,15 @@ int main(void){
         fgets(buffer, sizeof(buffer), arquivo_Y);
       }
 
-      for(int i=1; i<linhas-2; i++){
-        for(int j=1; j<colunas-2; j++){
+      for(int i=0; i<linhas; i++){
+        for(int j=0; j<colunas; j++){
           int valueX, valueY, sumValues;
           fscanf(arquivo_X,"%d", &valueX);
           fscanf(arquivo_Y,"%d", &valueY);
-          sumValues = valueX + valueY;
+          sumValues = sqrt((valueX * valueX) + (valueY * valueY));
+          //sumValues = valueX + valueY;
           
+
           if(sumValues > 255){
             sumValues = 255;
           }
