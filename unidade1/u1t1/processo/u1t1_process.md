@@ -291,5 +291,5 @@ Vamos Observar quais foram os resultados derivados dos processamento da imagem n
 ### [3/3] 🔶 Borda Mesclada
 
 <p align='center'>
-    <img width=300 src="../"/>
+    <img width=300 src="../processo/arquivo_final.png"/>
 </p>
