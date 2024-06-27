@@ -48,7 +48,7 @@ Vamos aplicar os conhecimentos adquiridos nesse readme e fazer um exemplo simple
 #include <sys/stat.h>
 
 int main(void){
-    
+  
     printf("(fora) PID do processo pai = %d\n", getpid());
 
     int pid = fork();
@@ -61,7 +61,7 @@ int main(void){
         printf("PID do processo filho = %d", getpid());
         exit();
     }
-    
+  
     return 0;
 }
 ```
@@ -85,19 +85,13 @@ Os processos são elementos fundamentais em sistemas operacionais e podemos alen
 ### 👍 Vantangens
 
 1. **Concorrência**: Os processos permitem a execução simultânea de várias tarefas, melhorando a eficiência do sistema operacional.
-
 2. **Isolamento**: Cada processo é isolado dos outros, o que aumenta a segurança e a estabilidade do sistema, já que um processo não pode interferir diretamente no funcionamento de outro.
-
 3. **Compartilhamento de recursos**: Apesar do isolamento, os processos podem compartilhar recursos, como arquivos e dispositivos de entrada/saída, por meio de mecanismos de comunicação entre processos.
-
 4. **Facilidade de programação**: O uso de processos simplifica a programação, pois cada processo pode ser desenvolvido e testado separadamente, facilitando a manutenção e a depuração do código.
 
 ### 👎 Desvantagens
 
 1. **Overhead**: Cada processo requer recursos do sistema, como memória e tempo de CPU, o que pode resultar em um overhead significativo em sistemas com muitos processos.
-
 2. **Comutação de contexto**: A troca entre processos (comutação de contexto) tem um custo em termos de tempo e recursos do sistema, o que pode impactar a eficiência em sistemas com muitas trocas de contexto.
-
 3. **Sincronização**: Em sistemas com múltiplos processos, a sincronização entre processos pode ser complexa e propensa a erros, especialmente em casos de acesso concorrente a recursos compartilhados.
-
 4. **Complexidade de gerenciamento**: Gerenciar muitos processos pode ser complexo, requerendo algoritmos de escalonamento e gerenciamento de memória eficientes para garantir um desempenho adequado do sistema.
