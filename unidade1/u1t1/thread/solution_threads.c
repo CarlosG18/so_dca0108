@@ -6,11 +6,11 @@
 #include <math.h>
 #include <pthread.h>
 
-typedef struct{
-    int linhas;
-    int colunas;
-    int **matriz_imagem;
-}Imagem_data;
+// criando as variaveis globais do sistema
+int** matriz_I;
+int** matriz_x;
+int** matriz_y;
+int linhas, colunas;
 
 int** create_matriz(int linhas, int colunas){
   /*
@@ -35,14 +35,22 @@ int** create_matriz(int linhas, int colunas){
   return matriz;
 }
 
-void get_matriz_img(Imagem_data *img){
-  //primeira parte - alocando uma matriz com os valores da imagem
+void get_matriz_img(){
+  /*
+    função para obter os valores de um arquivo (.pgm) e atribuir a matriz_I
+
+      args:
+      - NULL
+
+      return:
+      - NULL
+  */
+
   FILE *arquivo = fopen("coins.ascii.pgm","r"); // obtendo um ponteiro para o arquivo base
-  int colunas, linhas;
 
   char buffer[256];
 
-  if(arquivo == NULL){
+  if(arquivo == NULL){ // verificando a abertura do arquivo
     printf("erro na abertura de arquivo");
   }else{
     //desconsiderando algumas linhas que não são importantes para o programa
@@ -53,114 +61,120 @@ void get_matriz_img(Imagem_data *img){
     fgets(buffer, sizeof(buffer), arquivo);
   }
 
-  img->linhas = linhas;
-  img->colunas = colunas;
+  matriz_I = create_matriz(linhas, colunas); // alocando memoria para a matriz_I
 
-  int **matriz_img = create_matriz(linhas, colunas); // criando uma matriz do tamanho da imagem
-
-  
-  //add valores da imagem na matriz_img
+  //add valores da imagem na matriz_I
   for(int i = 0; i<linhas; i++){
     for(int j=0;j<colunas;j++){
       int valor;
         fscanf(arquivo, "%d", &valor);
-        matriz_img[i][j] = valor;
+        matriz_I[i][j] = valor;
     }
   }
-  
-  fclose(arquivo);
-
-  img->matriz_imagem = matriz_img;
+  fclose(arquivo); // fechando o arquivo
 }
 
-void* processamento_eixo_x(void *args){
-    Imagem_data *dados = (Imagem_data *)args;
-    printf("thread do processamento x!");
-    /*
-    for(int i = 0; i < linhas; i++){
-        for(int j = 0; j < colunas; j++){
-            if(i == 0 || j == 0 || i == linhas-1 || j == colunas-1){
-                fprintf(arquivo_x, "%d  ", matriz_img[i][j]);
-            }else{
-                // realizando a operação de convolução para o eixo x
-                int parcela1 = matriz_img[i-1][j-1] + matriz_img[i][j-1] + matriz_img[i+1][j-1];
-                int parcela2 = matriz_img[i-1][j+1] + matriz_img[i][j+1] + matriz_img[i+1][j+1];
-                matriz_x[i][j] = parcela2 - parcela1;
-                
-                // ajustando limites de valores
+void* processamento_eixo_x(){
+  /*
+  função para calcular a convolução no eixo x e atribuir a matriz_x - THREAD_ => thread filha da thread_mae
+
+    args:
+    - NULL
+
+    return:
+    - NULL
+  */
+
+  matriz_x = create_matriz(linhas, colunas); // alocando memória para a matriz_x
+
+  // percorrendo a matriz_I
+  for(int i = 0; i < linhas; i++){
+    for(int j = 0; j < colunas; j++){
+        if(i == 0 || j == 0 || i == linhas-1 || j == colunas-1){
+            matriz_x[i][j] = matriz_I[i][j];
+        }else{
+            // realizando a operação de convolução para o eixo x
+            int parcela1 = matriz_I[i-1][j-1] + matriz_I[i][j-1] + matriz_I[i+1][j-1];
+            int parcela2 = matriz_I[i-1][j+1] + matriz_I[i][j+1] + matriz_I[i+1][j+1];
+            matriz_x[i][j] = parcela2 - parcela1;
+            
+            // ajustando limites de valores
+            if(matriz_x[i][j] > 255){
+                matriz_x[i][j] = 255;
+            }
+            
+            // ajustando limites de valores
+            if(matriz_x[i][j] < 0){
+                matriz_x[i][j] = -1*matriz_x[i][j];
                 if(matriz_x[i][j] > 255){
-                    matriz_x[i][j] = 255;
+                matriz_x[i][j] = 255;
                 }
-                
-                // ajustando limites de valores
-                if(matriz_x[i][j] < 0){
-                    matriz_x[i][j] = -1*matriz_x[i][j];
-                    if(matriz_x[i][j] > 255){
-                    matriz_x[i][j] = 255;
-                    }
-                }
-                // armazenando no arquivo_x o valor em sua posição correspondente
-                fprintf(arquivo_x, "%d  ", matriz_x[i][j]);
             }
         }
-        fprintf(arquivo_x, "\n");
     }
-    */
-    pthread_exit(NULL);
+  }
+  pthread_exit(NULL); // finalizando a thread filha x
 }
 
-void* processamento_eixo_y(void * args){
-    Imagem_data *dados = (Imagem_data *)args;
-    printf("thread do processamento y!");
+void* processamento_eixo_y(){  
+  /*
+  função para calcular a convolução no eixo y e atribuir a matriz_y - THREAD_Y => thread filha da thread_mae
 
-    /*
-      for(int i = 0; i < linhas; i++){
-        for(int j = 0; j < colunas; j++){
-          if(i == 0 || j == 0 || i == linhas-1 || j == colunas-1){
-            fprintf(arquivo_y, "%d  ", matriz_img[i][j]);
-          }else{
-            // realizando a operação de convolução para o eixo y
-            int parcela1 = matriz_img[i-1][j-1] + matriz_img[i-1][j] + matriz_img[i-1][j+1];
-            int parcela2 = matriz_img[i+1][j-1] + matriz_img[i+1][j] + matriz_img[i+1][j+1];
-            matriz_y[i][j] = parcela2 - parcela1;
-            
-            // ajustando limites de valores
-            if(matriz_y[i][j] > 255){
-              matriz_y[i][j] = 255;
-            }
-            
-            // ajustando limites de valores
-            if(matriz_y[i][j] < 0){
-              matriz_y[i][j] = -1*matriz_y[i][j];
-              if(matriz_y[i][j] > 255){
-                matriz_y[i][j] = 255;
-              }
-            }
-            // armazenando no arquivo_y o valor em sua posição correspondente
-            fprintf(arquivo_y, "%d  ", matriz_y[i][j]);
-          }
+    args:
+    - NULL
+
+    return:
+    - NULL
+  */
+  
+  matriz_y = create_matriz(linhas,colunas); // alocando memória para a matriz_y
+
+  // percorrendo a matriz_I
+  for(int i = 0; i < linhas; i++){
+    for(int j = 0; j < colunas; j++){
+      if(i == 0 || j == 0 || i == linhas-1 || j == colunas-1){
+        matriz_y[i][j] = matriz_I[i][j];
+      }else{
+        // realizando a operação de convolução para o eixo y
+        int parcela1 = matriz_I[i-1][j-1] + matriz_I[i-1][j] + matriz_I[i-1][j+1];
+        int parcela2 = matriz_I[i+1][j-1] + matriz_I[i+1][j] + matriz_I[i+1][j+1];
+        matriz_y[i][j] = parcela2 - parcela1;
+        
+        // ajustando limites de valores
+        if(matriz_y[i][j] > 255){
+          matriz_y[i][j] = 255;
         }
-        fprintf(arquivo_y, "\n");
+        
+        // ajustando limites de valores
+        if(matriz_y[i][j] < 0){
+            matriz_y[i][j] = -1*matriz_y[i][j];
+            if(matriz_y[i][j] > 255){
+            matriz_y[i][j] = 255;
+            }
+        }
       }
     }
-    // fechando o arquivo e liberando memoria da matriz y
-    fclose(arquivo_y);
-    free(matriz_y[0]);
-    free(matriz_y);
-  }else{
-    filho2 = wait(&estado2); // enquanto o processo não finalizar ele ficará aguardando
-    exit(0); // processo finalizado
-    */
-    pthread_exit(NULL);
+  }
+
+  pthread_exit(NULL); // finalizando a thread filha y
 }
 
 void* thread_mae_routine(){
-  Imagem_data dados;
-  get_matriz_img(&dados);
-  pthread_t thread_x, thread_y; 
+  /*
+  rotina da thread mãe, onde será obtido a matriz_I e criado as threads filhas para o processamento da imagem.
+
+    args:
+    - NULL
+
+    return:
+    - NULL
+  */
+
+  get_matriz_img(); // obtenção da matriz_I a partir do arquivo .pgm
+  pthread_t thread_x, thread_y; // definindo as variaveis correspondentes as threads filhas do tipo pthread_t
 
   // criando a thread filha para o processamento da imagem no eixo x
-  if(pthread_create(&thread_x, NULL, processamento_eixo_x,(void *) &dados)){ // a thread será criada e será executada a função processamento_eixo_x
+  if(pthread_create(&thread_x, NULL, processamento_eixo_x,NULL)){ // a thread será criada e será executada a função processamento_eixo_x
     fprintf(stderr, "Erro ao criar a thread_x\n"); // caso a criação não ocorra com sucesso o retorno da função pthread_create será 1 e entrará no if imprimindo a mensagem de erro
   }
 
@@ -168,53 +182,54 @@ void* thread_mae_routine(){
   if (pthread_join(thread_x, NULL)) {
         fprintf(stderr, "Erro ao aguardar a thread_x\n");
         exit(1);
-    }
-
-  // criando a thread filha para o processamento da imagem no eixo y
-  if(pthread_create(&thread_y, NULL, processamento_eixo_y,(void *) &dados)){ // a thread será criada e será executada a função processamento_eixo_x
-    fprintf(stderr, "Erro ao criar a thread_y\n"); // caso a criação não ocorra com sucesso o retorno da função pthread_create será 1 e entrará no if imprimindo a mensagem de erro
   }
 
+  // criando a thread filha para o processamento da imagem no eixo y
+  if(pthread_create(&thread_y, NULL, processamento_eixo_y,NULL)){ // a thread será criada e será executada a função processamento_eixo_x
+    fprintf(stderr, "Erro ao criar a thread_y\n"); // caso a criação não ocorra com sucesso o retorno da função pthread_create será 1 e entrará no if imprimindo a mensagem de erro
+  }
+  
   // aguardando a thread_y terminar seu processamento para que a thread_mae possa obter a imagem a partir da matriz_img resultante dos dois processamentos
   if (pthread_join(thread_y, NULL)) {
         fprintf(stderr, "Erro ao aguardar a thread_y\n");
         exit(1);
-    }
-
+  }
+  
   //gerando um arquivo com os dados processados
   FILE *arquivo_final = fopen("arquivo_final.ascii.pgm", "w");
   
-  if(arquivo_final == NULL){
+  if(arquivo_final == NULL){ // verificando criação do novo arquivo
     printf("Erro em abrir o arquivo_final!");
   }else{
     //incluir as linhas bases
     fprintf(arquivo_final,"P2\n");
     fprintf(arquivo_final,"# fred.pgm created by PGMA_IO::PGMA_WRITE.\n");
-    fprintf(arquivo_final,"%d %d\n", 300, 246);
+    fprintf(arquivo_final,"%d %d\n", colunas, linhas);
     fprintf(arquivo_final, "%d\n", 255);
 
-    // varendo cada pixel da imagem e realizando a escrita no arquivo final
-    for(int i=0; i<dados.linhas; i++){
-        for(int j=0; j<dados.colunas; j++){
-            // ajustando valores
-            if(dados.matriz_imagem[i][j] > 255){
-                // escrevendo o valor resultante no arquivo_final
-                fprintf(arquivo_final, "%d ", 255);
-            }else{
-                // escrevendo o valor resultante no arquivo_final
-                fprintf(arquivo_final, "%d ", dados.matriz_imagem[i][j]);
-            }
-            
-            
-        }
+  // percorrendo as matrizes x e y
+  for(int i=0; i<linhas; i++){
+    for(int j=0; j<colunas; j++){
+      int valueX = matriz_x[i][j]; // obtendo o valor correspondente a posição da linha i e coluna j da matriz_x
+      int valueY = matriz_y[i][j]; // obtendo o valor correspondente a posição da linha i e coluna j da matriz_y
+      int sumValues = valueX + valueY; // somando os valores para ser atribuido ao arquivo final
+          
+      // ajustando valores
+      if(sumValues > 255){
+        sumValues = 255;
+      }
+          
+      // escrevendo o valor resultante no arquivo_final
+      fprintf(arquivo_final, "%d ", sumValues);
     }
   }
 
-    pthread_exit(NULL);
+  pthread_exit(NULL); // finalizando a thread mãe
+  }
 }
 
 int main(void){
-  pthread_t thread_mae;
+  pthread_t thread_mae; // definindo a variavel conrrespondente a thread mãe
   
   // criando a thread mãe do algoritimo, responsável por gerar a matriz imagem e administrar as threads filhas
   if(pthread_create(&thread_mae, NULL, thread_mae_routine, NULL)){ // a thread será criada
