@@ -31,6 +31,8 @@ Na segunda unidade do curso, focamos no estudo do **escalonamento de processos**
 
 ### 🎯 Atividades/projetos
 
+- [📌 Escalonamento de Processos](./unidade2/u2t1/u2t1.md)
+
 ## 🚀 Unidade III
 
 ### 🎯 Atividades/projetos
