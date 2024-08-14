@@ -1,0 +1,23 @@
+# Ignore Python virtual environments
+venv/
+ENV/
+env/
+.venv/
+.VENV/
+ENV*/
+env*/
+.venv*/
+.VENV*/
+
+# If you have specific files within the virtual environment you want to exclude
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.installed.cfg
+*.egg
+.Python
+
+# macOS
+.DS_Store
