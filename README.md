@@ -23,16 +23,6 @@ Na primeira unidade da disciplina de Sistemas Operacionais, abordamos os conceit
 
 Na segunda unidade do curso, focamos no estudo do **escalonamento de processos** e no papel dos **despachantes**. O escalonamento é um componente crucial em sistemas operacionais, responsável por **determinar a ordem de execução dos processos na CPU**, garantindo eficiência e justiça no uso dos recursos. Exploramos diferentes algoritmos de escalonamento, como **FIFO** (First In, First Out), **SJF** (Shortest Job First), e **Round Robin**, discutindo suas vantagens, desvantagens, e aplicabilidades em diferentes cenários.Além disso, estudamos o conceito de despachantes (dispatchers), que são responsáveis por realizar a troca de contexto entre processos. O **despachante** assegura que o processo selecionado pelo escalonador receba o controle da CPU, executando tarefas como a troca de registros, atualização da tabela de processos, e outras operações necessárias para garantir a transição suave entre os estados de execução dos processos.
 
-### 📚 Assuntos
-
-- [📝 Escalonamento]()
-
-- [📝 Despachante]()
-
 ### 🎯 Atividades/projetos
 
 - [📌 Escalonamento de Processos](./unidade2/u2t1/u2t1.md)
-
-## 🚀 Unidade III
-
-### 🎯 Atividades/projetos
